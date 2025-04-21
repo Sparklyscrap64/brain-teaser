@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>Quiz Game</title>
+    <style>
+        html {scroll-behavior: smooth;}
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to left, #283d77, #471069, #283d77, #471069);
+            background-size: 400% 400%;
+            animation: gradientAnim 25s ease infinite;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        @keyframes gradientAnim {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        .container { max-width: 600px; width: 100%; padding: 20px; background: #3d3d58; box-shadow: 0px 0px 15px #2823239c; border-radius: 10px; text-align: center; }
+        .hidden { display: none; }
+        .question { margin: 20px 0; font-size: 20px; font-weight: bold; }
+        .btn { padding: 10px 15px; margin: 10px auto; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; display: block; width: 80%; }
+        .btn:hover { background-color: #575757; }
+        .btn-primary { background-color: #274eda; color: white; }
+        .btn-secondary { background-color: #FF5733; color: white; }
+        .progress-container { width: 100%; background-color: #555; border-radius: 20px; margin-top: 15px; }
+        .progress-bar { height: 20px; border-radius: 20px; text-align: center; line-height: 20px; color: white; font-weight: bold; background: linear-gradient(to right, #ff6b6b, #6b6bff); }
+        .correct { background-color: green !important; color: white; }
+        .wrong { background-color: red !important; color: white; }
+        .container .judul{padding: 20px;font-weight: bold;}
+        .result-detail { text-align: left; margin-top: 20px; background: #2c2c3e; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
+        .result-detail p { margin: 5px 0; }
+        .correct-answer { color: #4CAF50; font-weight: bold; }
+        .wrong-answer { color: #f44336; font-weight: bold; }
+        .neutral-answer {color: #ffa500; font-weight: bold;}
+        .w3-animate-top { animation: w3-animate-top 0.5s; }
+        @keyframes w3-animate-top {
+            from {top: -300px; opacity: 0} 
+            to {top: 0; opacity: 1}
+        }
+        @media (max-width: 600px) {
+            .container { width: 90%; }
+            .btn { width: 100%; }
+        }
+        @media (max-width: 400px) {
+            .btn { font-size: 14px; }
+            .question { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="w3-animate-top">
+        </div>
+        <div class="w3-animate-top">
+            <div id="start-screen">
+                <h1 class="judul">Brain Teaser</h1>
+                <img src="logo.png" alt="logo" width="150px">
+                <input type="text" id="player-name" placeholder="Masukkan nama Anda" class="w3-input w3-margin-top" 
+                style="text-align: center; 
+                border-radius: 5px; 
+                padding: 10px; width: 
+                60%; margin: auto; 
+                font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+                background-color: #f1f1f1; 
+                color: black bold;
+                border-radius: 5px;
+                "
+                />
+                <input type="text" id="player-class" placeholder="Masukkan kelas Anda" class="w3-input w3-margin-top" 
+                style="text-align: center; 
+                border-radius: 5px; 
+                padding: 10px; width: 
+                60%; margin: auto; 
+                font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+                background-color: #f1f1f1; 
+                color: black bold;
+                border-radius: 5px;
+                "/>
+                <br>
+                <button class="btn btn-primary" onclick="validateAndShowMenu()" style="width: 60%;">Mulai</button>
+            </div>
+        </div>
+        <div id="menu" class="hidden">
+            <img src="logo.png" alt="logo" width="150px"> 
+            <p>Pilih kategori quiz</p>
+            <button id="btn-sinonim" class="btn btn-primary" onclick="startGame('sinonim')">Sinonim</button>
+            <button id="btn-antonim" class="btn btn-primary" onclick="startGameIfUnlocked('antonim')">Antonim</button>
+            <button id="btn-materi" class="btn btn-primary" onclick="startGameIfUnlocked('materi')">Materi Biasa</button> 
+            <button id="btn-hasil" class="btn btn-primary" onclick="showAllScores()">Lihat Nilai</button>
+        </div>
+        <div id="quiz" class="hidden">
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar" style="width: 100%">30</div>
+            </div>
+            <p id="question" class="question"></p>
+            <div id="answers"></div>
+        </div>
+        <div id="result" class="hidden">
+            <h2>Hasil Quiz</h2>
+            <p id="score"></p>
+            <div id="result-detail"></div>
+            <button class="btn btn-secondary" onclick="restartGame()">Lanjut ke quiz berikutnya</button>
+        </div>
+    </div>
+<!-- buatkan div tempat untuk hasil nilai semuanya lalu di tombol lihat nilai mengarahkan ke sini -->
+    <div id="hasil" class="hidden">
+       
+    </div>
+
+    <audio id="correct-sound" src="rightanswer-95219.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="wrong-47985.mp3" preload="auto"></audio>
+
+    <script>
+        function showMenu() {
+            document.getElementById("start-screen").classList.add("hidden");
+            document.getElementById("menu").classList.remove("hidden");
+            updateMenuButtons();
+        }
+
+        const questions = {
+            sinonim: [
+                { "q": "Sinonim dari 'abstrak'?", "a": ["Nyata", "Konkret", "Kabur", "Samar"], "correct": 3 },
+                { "q": "Sinonim dari 'akomodasi'?", "a": ["Penginapan", "Perubahan", "Perjalanan", "Penyesuaian"], "correct": 0 },
+                { "q": "Sinonim dari 'konvensional'?", "a": ["Modern", "Tradisional", "Inovatif", "Radikal"], "correct": 1 },
+                { "q": "Sinonim dari 'ekspresi'?", "a": ["Perasaan", "Ungkapan", "Penjelasan", "Kemauan"], "correct": 1 },
+                { "q": "Sinonim dari 'fundamental'?", "a": ["Pokok", "Biasa", "Sederhana", "Kompleks"], "correct": 0 },
+                { "q": "Sinonim dari 'ilustrasi'?", "a": ["Warna", "Karangan", "Gambar", "Lagu"], "correct": 2 },
+                { "q": "Sinonim dari 'kompeten'?", "a": ["Mahir", "Lemah", "Ragu", "Pelupa"], "correct": 0 },
+                { "q": "Sinonim dari 'modifikasi'?", "a": ["Perubahan", "Penghapusan", "Pengurangan", "Penambahan"], "correct": 0 },
+                { "q": "Sinonim dari 'signifikan'?", "a": ["Penting", "Biasa", "Kecil", "Tidak perlu"], "correct": 0 },
+                { "q": "Sinonim dari 'transparan'?", "a": ["Jernih", "Gelap", "Buram", "Samar"], "correct": 0 }
+            ],
+            antonim: [
+                { "q": "Antonim dari 'dermawan'?", "a": ["Baik", "Pelit", "Murah hati", "Suka memberi"], "correct": 1 },
+                { "q": "Antonim dari 'optimis'?", "a": ["Pesimis", "Semangat", "Percaya diri", "Antusias"], "correct": 0 },
+                { "q": "Antonim dari 'konvensional'?", "a": ["Tradisional", "Modern", "Lama", "Klasik"], "correct": 1 },
+                { "q": "Antonim dari 'inovatif'?", "a": ["Kreatif", "Biasa", "Stagnan", "Menarik"], "correct": 2 },
+                { "q": "Antonim dari 'superior'?", "a": ["Unggul", "Rendah", "Inferior", "Luar biasa"], "correct": 2 },
+                { "q": "Antonim dari 'eksplisit'?", "a": ["Jelas", "Tersirat", "Terang", "Terbuka"], "correct": 1 },
+                { "q": "Antonim dari 'serius'?", "a": ["Sungguh-sungguh", "Main-main", "Tekun", "Fokus"], "correct": 1 },
+                { "q": "Antonim dari 'fleksibel'?", "a": ["Kaku", "Lentur", "Bebas", "Luwes"], "correct": 0 },
+                { "q": "Antonim dari 'loyal'?", "a": ["Setia", "Pengkhianat", "Jujur", "Tulus"], "correct": 1 },
+                { "q": "Antonim dari 'abadi'?", "a": ["Kekal", "Sementara", "Selamanya", "Tak terbatas"], "correct": 1 }
+            ],
+            materi: [
+                { "q": "Apa tujuan utama dari teks anekdot?", "a": ["Menghibur dan memberi kritik secara halus","Memberi informasi faktual","Mempromosikan produk","Menjelaskan langkah-langkah"], "correct": 0 },
+                { "q": "Struktur teks laporan hasil observasi yang benar adalah...", "a": ["Orientasi, peristiwa, reorientasi", "pernyataan umum, deskripsi bagian, deskripsi manfaat", "Tesis, argumentasi, penegasan ulang", "Abstrak, orientasi, krisis, reaksi, koda"], "correct": 1 },
+                { "q": "Ciri kebahasaan teks eksposisi adalah...", "a": ["Menggunakan majas", "Menggunakan kalimat perintah", "Menggunakan kata-kata teknis dan fakta", "Menggunakan kata kerja imperatif"], "correct": 2 },
+                { "q": "Contoh kata tidak baku di bawah ini adalah...", "a": ["Risiko", "Kualitas", "Aktifitas", "Objektif"], "correct": 2 },
+                { "q": "Puisi memiliki unsur batin. Salah satunya adalah amanat, yaitu...", "a": ["Sikap penyair terhadap tema", "Perasaan yang terkandung dalam puisi", "Nada dan irama dalam puisi", "Pesan yang ingin disampaikan penyair"], "correct": 3 },
+                { "q": "Kalimat yang merupakan kalimat opini adalah...", "a": ["Banjir terjadi akibat curah hujan tinggi.", "Gempa berkekuatan 6,5 SR mengguncang wilayah selatan.", "Menurut saya, pemerintah kurang sigap menanggapi bencana.", "Data menunjukkan peningkatan suhu global setiap tahun."], "correct": 2 },
+                { "q": "Apa fungsi paragraf argumentasi dalam teks eksposisi?", "a": ["Menghibur pembaca", "Mendukung pernyataan pendapat dengan alasan", "Menjelaskan tokoh dan alur", "Menutup pembahasan dengan kesimpulan"], "correct": 1 },
+                { "q": "Ciri teks anekdot adalah...", "a": ["Lucu, menyentuh, dan penuh emosi", "Faktual, formal, dan objektif", "Lucu, menyindir, dan berdasarkan kejadian nyata", "Penuh imajinasi dan naratif"], "correct": 2 },
+                { "q": "Kalimat yang menggunakan kata baku adalah...", "a": ["Dia mempublikasikan hasil penelitian itu.", "Ia mentraktir temannya makan siang.", "Mereka menyebarkan brosur promosi.", "Saya menyukai aktifitas di luar ruangan."], "correct": 0 },
+                { "q": "Unsur penting dalam laporan hasil observasi adalah...", "a": ["Fiksi dan sudut pandang penulis", "Informasi fakta hasil pengamatan", "Alur cerita dan tokoh", "Dialog dan konflik"], "correct": 1 }
+            ]
+        };
+
+        let playerName = "";
+        let currentCategory = "", currentIndex = 0, score = 0, timer;
+        let answerResults = [];
+        let unlockedLevels = {
+            sinonim: true,
+            antonim: false,
+            materi: false
+        };
+        let scores = {
+            sinonim: 0,
+            antonim: 0,
+            materi: 0
+        };
+
+        function validateAndShowMenu() {
+            const nameInput = document.getElementById("player-name").value.trim();
+            const classInput = document.getElementById("player-class").value.trim();
+
+            if (nameInput === "" && classInput === "") {
+                alert("Silakan masukkan nama dan kelas Anda terlebih dahulu.");
+                return;
+            }
+            if (nameInput === "") {
+                alert("Silakan masukkan nama Anda terlebih dahulu.");
+                return;
+            }
+            if (classInput === "") {
+                alert("Silakan masukkan kelas Anda terlebih dahulu.");
+                return;
+            }
+
+            playerName = nameInput;
+            playerClass = classInput;
+            showMenu();
+        }
+
+
+            function startGame(category) {
+            currentCategory = category;
+            currentIndex = 0;
+            score = 0;
+            answerResults = [];
+            document.getElementById("menu").classList.add("hidden");
+            document.getElementById("quiz").classList.remove("hidden");
+            nextQuestion();
+        }
+
+        function startGameIfUnlocked(category) {
+                if (!unlockedLevels[category]) {
+                    alert("Kategori ini masih terkunci. Selesaikan level sebelumnya terlebih dahulu.");
+                    return;
+                }
+                startGame(category);
+            }
+
+
+        function startTimer() {
+            let timeLeft = 30;
+            let progressBar = document.getElementById("progress-bar");
+            progressBar.style.width = "100%";
+            progressBar.textContent = timeLeft;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                let percent = (timeLeft / 30) * 100;
+                progressBar.style.width = percent + "%";
+                progressBar.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                clearInterval(timer);
+                timeoutHandler();
+            }
+            }, 1000);
+        }
+
+        function nextQuestion() {
+            clearInterval(timer);
+            if (currentIndex < questions[currentCategory].length) {
+                const q = questions[currentCategory][currentIndex];
+                document.getElementById("question").textContent = q.q;
+                document.getElementById("answers").innerHTML = "";
+                q.a.forEach((answer, index) => {
+                    const btn = document.createElement("button");
+                    btn.textContent = answer;
+                    btn.classList.add("btn", "btn-primary");
+                    btn.onclick = () => answerQuestion(index, q.correct, btn);
+                    document.getElementById("answers").appendChild(btn);
+                });
+                startTimer();
+            } else {
+                endGame();
+            }
+        }
+
+        function answerQuestion(selectedIndex, correctIndex, selectedButton) {
+            clearInterval(timer);
+            let buttons = document.querySelectorAll("#answers .btn");
+
+            const q = questions[currentCategory][currentIndex];
+            const selectedText = q.a[selectedIndex];
+            const correctText = q.a[correctIndex];
+            const isCorrect = selectedIndex === correctIndex;
+
+            if (isCorrect) {
+                document.getElementById("correct-sound").play();
+            } else {
+                document.getElementById("wrong-sound").play();
+            }
+
+            answerResults.push({
+                number: currentIndex + 1,
+                question: q.q,
+                selected: selectedText,
+                correct: correctText,
+                status: isCorrect ? "Benar" : "Salah"
+            });
+
+            buttons[correctIndex].classList.add("correct");
+            if (!isCorrect) {
+                selectedButton.classList.add("wrong");
+            } else {
+                score += 10;
+            }
+
+            buttons.forEach(btn => btn.onclick = null);
+
+            setTimeout(() => {
+                currentIndex++;
+                nextQuestion();
+            }, 1500);
+        }
+
+        function timeoutHandler() {
+            const q = questions[currentCategory][currentIndex];
+            const correctText = q.a[q.correct];
+
+            answerResults.push({
+                number: currentIndex + 1,
+                question: q.q,
+                selected: "///",
+                correct: correctText,
+                status: "Waktu Habis"
+            });
+
+            let buttons = document.querySelectorAll("#answers .btn");
+            buttons[q.correct].classList.add("correct");
+            buttons.forEach(btn => btn.onclick = null);
+
+            setTimeout(() => {
+                currentIndex++;
+                nextQuestion();
+            }, 1500);
+        }
+
+            function updateMenuButtons() {
+            document.getElementById("btn-antonim").disabled = !unlockedLevels.antonim;
+            document.getElementById("btn-materi").disabled = !unlockedLevels.materi;
+
+            document.getElementById("btn-antonim").style.opacity = unlockedLevels.antonim ? 1 : 0.5;
+            document.getElementById("btn-materi").style.opacity = unlockedLevels.materi ? 1 : 0.5;
+        }
+
+
+        function endGame() {
+            clearInterval(timer);
+            document.getElementById("quiz").classList.add("hidden");
+            document.getElementById("result").classList.remove("hidden");
+            document.getElementById("score").innerHTML = `<strong>${playerName}</strong>, skor Anda: ${score}`;
+
+            if (currentCategory === "sinonim") {
+                unlockedLevels.antonim = true;
+            } else if (currentCategory === "antonim") {
+                unlockedLevels.materi = true;
+            }
+
+            updateMenuButtons();
+
+            let detailHTML = "<h3>Rangkuman Jawaban:</h3>";
+            answerResults.forEach(res => {
+                const statusClass = res.status === "Benar" ? "correct-answer" :
+                    res.status === "Salah" ? "wrong-answer" : "neutral-answer";
+                    detailHTML += `<p><strong>Soal ${res.number}:</strong> ${res.question}<br>
+                    Jawaban Anda: <span class="${statusClass}">${res.selected}</span><br>
+                    Jawaban Benar: <span class="correct-answer">${res.correct}</span><br>
+                    Hasil: <span class="${statusClass}">${res.status}</span></p><hr>`;
+            });
+
+            document.getElementById("result-detail").innerHTML = `<div class="result-detail">${detailHTML}</div>`;
+        }
+
+        function restartGame() {
+            answerResults = [];
+            document.getElementById("result").classList.add("hidden");
+            document.getElementById("menu").classList.remove("hidden");
+            updateMenuButtons();
+        }
+    </script>
+</body>
+</html>
